@@ -1,10 +1,11 @@
 package com.credera.rest
 
 import akka.actor.Actor
+import com.credera.dao.ProfileDAO
 import com.credera.dto.{ProfileJsonProtocol, ProfileDTO}
+import com.credera.h2.{Profile, DataSource}
 import spray.httpx.SprayJsonSupport
 import spray.routing.HttpService
-import spray.json._
 import ProfileJsonProtocol._
 
 
@@ -16,16 +17,17 @@ class ProfileActor extends Actor with ProfileService{
 
 }
 
-trait ProfileService extends HttpService with SprayJsonSupport  {
+trait ProfileService extends HttpService with SprayJsonSupport with H2Connect  {
+
+  val dao = new ProfileDAO()
 
   val profileRoute = {
     path("profile") {
       get {
         complete {
-          ProfileDTO("Sam", "Bunting", "sam@g.com")
+          dao.fetchProfiles
         }
-      }
-
+      } ~
       post {
         entity(as[ProfileDTO]){
           profile =>
@@ -38,6 +40,5 @@ trait ProfileService extends HttpService with SprayJsonSupport  {
         }
     }
   }
-
 
 }
