@@ -10,5 +10,8 @@ class Profile(tag: Tag) extends Table[(Int, String, String, String)](tag, "PROFI
   def email = column[String]("Email_ID")
 
   def * = (id, firstName, lastName, email)
+//  def autoInc = firstName returning id
 }
+
+
 

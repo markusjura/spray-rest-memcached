@@ -1,14 +1,13 @@
 package com.credera.h2
 
+import com.credera.dto.ProfileDTO
 import com.mchange.v2.c3p0.ComboPooledDataSource
 
 import scala.slick.driver.H2Driver.simple._
 
-
-
 object DataSource {
 
-  val profiles = TableQuery[Profile]
+  val Profiles = TableQuery[Profile]
 
   val cpds = new ComboPooledDataSource
 
@@ -22,10 +21,10 @@ object DataSource {
   def apply() = {
     h2 withSession {
       implicit session =>
-        profiles.ddl.create
+        Profiles.ddl.create
 
-        profiles += (1, "Sam", "Bunting", "s@gmail.com")
-        profiles += (2, "Andrew", "DeMaria", "j@gmail.com")
+        Profiles += (1, "Sam", "Bunting", "s@gmail.com")
+        Profiles += (2, "Andrew", "DeMaria", "j@gmail.com")
     }
   }
 
