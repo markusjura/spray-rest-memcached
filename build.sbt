@@ -11,6 +11,7 @@ libraryDependencies ++= {
   Seq(
     "io.spray"            %   "spray-can"     % sprayV,
     "io.spray"            %   "spray-routing" % sprayV,
+    "io.spray"            %   "spray-caching" % sprayV,
     "io.spray"            %   "spray-testkit" % sprayV  % "test",
     "com.h2database"      %   "h2"            % "1.2.127",
     "io.spray"            %%  "spray-json"    % "1.2.6",

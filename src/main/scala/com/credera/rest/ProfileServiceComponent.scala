@@ -5,6 +5,8 @@ import com.credera.dto.ProfileDTO
 import com.credera.dto.ProfileJsonProtocol._
 import spray.httpx.SprayJsonSupport
 import spray.routing.HttpService
+import spray.caching._
+import spray.routing.directives.CachingDirectives._
 
 trait ProfileServiceComponent { this: ProfileDAOComponent =>
 
@@ -14,9 +16,11 @@ trait ProfileServiceComponent { this: ProfileDAOComponent =>
       path("profile") {
 
         get {
-          complete {
-            val profiles = profileDAO.fetchProfiles.getOrElse(List.empty[ProfileDTO])
-            profiles
+          cache(routeCache()) {
+            complete {
+              val profiles = profileDAO.fetchProfiles.getOrElse(List.empty[ProfileDTO])
+              profiles
+            }
           }
         } ~
           post {
