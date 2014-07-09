@@ -1,7 +1,7 @@
 package com.credera.rest
 
 import com.credera.dao.ProfileDAOComponent
-import com.credera.dto.ProfileDTO
+import com.credera.dto.Profile
 import com.credera.dto.ProfileJsonProtocol._
 import spray.httpx.SprayJsonSupport
 import spray.routing.HttpService
@@ -14,19 +14,35 @@ trait ProfileServiceComponent { this: ProfileDAOComponent =>
       path("profile") {
 
         get {
-          complete {
-            val profiles = profileDAO.fetchProfiles.getOrElse(List.empty[ProfileDTO])
-            profiles
-          }
-        } ~
-          post {
-            entity(as[ProfileDTO]){
-              profile =>
-                complete {
-                  ProfileDTO(profile.id, profile.firstName, profile.lastName, "d@gmail.com")
-                }
+          detach() {
+            complete {
+              val profiles = profileDAO.fetchProfiles.getOrElse(List.empty[Profile])
+              profiles
             }
           }
+        } ~
+        post {
+          entity(as[Profile]){
+            profile =>
+              detach() {
+                complete {
+                  profileDAO.insertProfile(profile)
+                  profile
+                }
+              }
+          }
+        } ~
+        put {
+          entity(as[Profile]){
+            profile =>
+              detach() {
+                complete {
+                  profileDAO.updateProfile(profile)
+                  profile
+                }
+              }
+          }
+        }
 
       }
     }

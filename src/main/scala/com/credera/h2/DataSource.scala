@@ -1,13 +1,12 @@
 package com.credera.h2
 
-import com.credera.dto.ProfileDTO
 import com.mchange.v2.c3p0.ComboPooledDataSource
 
 import scala.slick.driver.H2Driver.simple._
 
 object DataSource {
 
-  val Profiles = TableQuery[Profile]
+  val Profiles = TableQuery[Profiles]
 
   val cpds = new ComboPooledDataSource
 

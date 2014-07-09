@@ -23,7 +23,7 @@ libraryDependencies ++= {
   )
 }
 
-val starth2 = taskKey[Unit]( "Prints 'Hello World'")
+val starth2 = taskKey[Unit]("")
 
 starth2 := {
   val logger = streams.value.log
@@ -32,7 +32,5 @@ starth2 := {
     case n => sys.error(s"Could not restart the project, exit code: $n")
   }
 }
-
-//javaOptions := Seq("-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005")
 
 
