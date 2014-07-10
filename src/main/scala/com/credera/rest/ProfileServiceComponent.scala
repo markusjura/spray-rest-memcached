@@ -24,8 +24,7 @@ trait ProfileServiceComponent { this: ProfileDAOComponent =>
               val profiles = profileDAO.fetchProfiles.getOrElse(List.empty[Profile])
               profiles
             }
-          }
-        } ~
+          } ~
           post {
             entity(as[Profile]){
               profile =>
@@ -48,8 +47,13 @@ trait ProfileServiceComponent { this: ProfileDAOComponent =>
                 }
             }
           }
+        } ~
+        get {
+          complete {
+            "Hi there!  Try /profile for the user rest api"
+          }
+        }
       }
-
     }
   }
 
