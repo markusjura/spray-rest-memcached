@@ -1,6 +1,7 @@
 package com.credera.config
 
 import com.typesafe.config.ConfigFactory
+import scala.collection.JavaConverters._
 
 object AppConfig {
 
@@ -10,7 +11,7 @@ object AppConfig {
 
     private val memCachedConfig = config.getConfig("memcached")
 
-    lazy val host = memCachedConfig.getString("host")
+    lazy val hosts = memCachedConfig.getStringList("hosts").asScala.toList
 
   }
 
