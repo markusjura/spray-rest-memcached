@@ -7,12 +7,14 @@ import spray.httpx.SprayJsonSupport
 import spray.routing.HttpService
 import spray.routing.directives.CachingDirectives._
 import com.credera.cache.MemcachedCache
+import com.credera.config.AppConfig
+import scala.collection.JavaConversions._
 
 trait ProfileServiceComponent { this: ProfileDAOComponent =>
 
   trait ProfileService extends HttpService with SprayJsonSupport  {
 
-    val theCache = MemcachedCache.routeCache(List("localhost:11211"),30,true)
+    val theCache = MemcachedCache.routeCache(AppConfig.Memcached.hosts,30,true)
 
     val profileRoute = {
       cache(theCache) {
