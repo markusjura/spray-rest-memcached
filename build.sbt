@@ -20,7 +20,9 @@ libraryDependencies ++= {
     "org.specs2"          %%  "specs2"        % "2.2.3" % "test",
     "com.typesafe.slick"  %%  "slick"         % "2.0.2",
     "org.slf4j"           %   "slf4j-nop"     % "1.6.4",
-    "c3p0"                % "c3p0"            % "0.9.0.4"
+    "c3p0"                % "c3p0"            % "0.9.0.4",
+    "net.spy"             % "spymemcached"    % "2.11.4",
+    "com.twitter"         % "finagle-memcached_2.10" % "6.18.0"
   )
 }
 
