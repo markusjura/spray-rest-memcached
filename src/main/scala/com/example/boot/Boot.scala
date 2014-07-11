@@ -1,9 +1,9 @@
-package com.credera.boot
+package com.example.boot
 
 import akka.actor.{Props, ActorSystem}
 import akka.io.IO
-import com.credera.jdbc.DataSource
-import com.credera.rest.ProfileActor
+import com.example.jdbc.DataSource
+import com.example.rest.ProfileActor
 import spray.can.Http
 
 object Boot extends App {

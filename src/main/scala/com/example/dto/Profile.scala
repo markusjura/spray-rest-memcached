@@ -1,4 +1,4 @@
-package com.credera.dto
+package com.example.dto
 
 import spray.json.DefaultJsonProtocol
 

@@ -1,7 +1,7 @@
-package com.credera.registry
+package com.example.registry
 
-import com.credera.dao.ProfileDAOComponent
-import com.credera.rest.ProfileServiceComponent
+import com.example.dao.ProfileDAOComponent
+import com.example.rest.ProfileServiceComponent
 
 object ComponentRegistry
   extends ProfileServiceComponent

@@ -1,7 +1,7 @@
-package com.credera.dao
+package com.example.dao
 
-import com.credera.dto.Profile
-import com.credera.jdbc.DataSource._
+import com.example.dto.Profile
+import com.example.jdbc.DataSource._
 import scala.slick.driver.H2Driver.simple._
 import grizzled.slf4j.Logger
 

@@ -1,4 +1,4 @@
-package com.credera.cache
+package com.example.cache
 
 import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext

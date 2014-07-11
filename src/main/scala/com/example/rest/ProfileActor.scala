@@ -1,7 +1,7 @@
-package com.credera.rest
+package com.example.rest
 
 import akka.actor.Actor
-import com.credera.registry.ComponentRegistry.ProfileService
+import com.example.registry.ComponentRegistry.ProfileService
 
 class ProfileActor extends Actor with ProfileService{
   def actorRefFactory = context

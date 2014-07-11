@@ -1,6 +1,6 @@
-package com.credera.jdbc
+package com.example.jdbc
 
-import com.credera.config.AppConfig
+import com.example.config.AppConfig
 import com.mchange.v2.c3p0.ComboPooledDataSource
 
 import scala.slick.driver.H2Driver.simple._

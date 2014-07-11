@@ -1,13 +1,13 @@
-package com.credera.rest
+package com.example.rest
 
-import com.credera.dao.ProfileDAOComponent
-import com.credera.dto.Profile
-import com.credera.dto.ProfileJsonProtocol._
+import com.example.dao.ProfileDAOComponent
+import com.example.dto.Profile
+import com.example.dto.ProfileJsonProtocol._
 import spray.httpx.SprayJsonSupport
 import spray.routing.HttpService
 import spray.routing.directives.CachingDirectives._
-import com.credera.cache.MemcachedCache
-import com.credera.config.AppConfig
+import com.example.cache.MemcachedCache
+import com.example.config.AppConfig
 import scala.collection.JavaConversions._
 
 trait ProfileServiceComponent { this: ProfileDAOComponent =>

@@ -1,4 +1,4 @@
-package com.credera.config
+package com.example.config
 
 import com.typesafe.config.ConfigFactory
 import scala.collection.JavaConverters._
