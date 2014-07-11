@@ -24,7 +24,7 @@
 							href="#code/src/main/resources/application.conf"
 							class="shortcut">application.conf</a> file. The <code>hosts</code>entry
 					nested under <code>memcached</code> accepts a list of strings in the
-					format of "host:port". Change this variable to point to one or more
+					format of <code>"host:port"</code>. Change this variable to point to one or more
 					other memcached instances.</p> 
     </div>
 
@@ -38,7 +38,19 @@
 
 		<div>
 			<h2>Using Memcached</h2>
-			<p>To see how Memcached is being used with the app, take a look at the <a href="#code/src/main/scala/rest/ProfileServiceComponent.scala" class="shortcut">routes</a> again. Caching is done via the <a href="http://spray.io/documentation/1.0.1/spray-routing/caching-directives/cache/" >cache directive</a>. The cache directive accepts an implementation of a Spray cache which usually references the default <code>LruCache</code>. However, this template provides a custom implementation of a Spray cache: the <a href"#code/src/main/scala/com/credera/cache/MemcachedCache.scala" class="shortcut">Memcache Cache</a>. The basic idea is the same as the LruCache implementation, except that we use Memcached instead of a ConcurrentHashMap for storing entries.</p>
+			<p>To see how Memcached is being used with the app, take a look at the <a
+						href="#code/src/main/scala/rest/ProfileServiceComponent.scala"
+						class="shortcut">routes</a> again. Caching is done via the <a
+								href="http://spray.io/documentation/1.0.1/spray-routing/caching-directives/cache/"
+								>cache directive</a>. The cache directive accepts an
+						implementation of a Spray cache which usually references the default
+						<code>LruCache</code>. However, this template provides a custom
+						implementation of a Spray cache: the <a
+								href="#code/src/main/scala/com/credera/cache/MemcachedCache.scala"
+								class="shortcut">MemcachedCache</a>. The basic idea is the same
+						as the <code>LruCache</code> implementation, except that we use Memcached instead
+						of a ConcurrentHashMap for storing entries.</p>
+
 			<p>Now lets look at Memcache in action. First make get request for all
 				profiles. <code>curl localhost:8080/profile</code>.  You should get a
 				response and in your console you should see a note that the database has
