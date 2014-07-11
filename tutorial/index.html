@@ -9,7 +9,15 @@
     <div>
         <h2>Prerequisites and Setup</h2>
         <p>This template demonstrates interaction from a spray web application with Memcached and therefore requires it to be installed.</p>
-        <p>Go to <a href="http://memcached.org/">memcached.org</a> to install the correct version for your operating system. Ensure Telnet can communicate to it</p>
+        <p>Go to <a href="http://memcached.org/">memcached.org</a> to install
+					the correct version for your operating system. To ensure that it is
+					up and running, you can try telneting to it.
+					<pre>
+						<code>
+						telnet localhost 11211
+						</code>
+					</pre>
+				</p>
     </div>
 
     <!-- General Overview -->
@@ -19,5 +27,9 @@
         <p>The <a href="#code/src/main/scala/rest/ProfileServiceComponent.scala" class="shortcut">ProfileServiceComponent</a> class is where we define the Profile route and add a few endpoints</p>
         <p></p>
     </div>
+
+		<div>
+			<h2></h2>
+		</div>
 </body>
 </html>
