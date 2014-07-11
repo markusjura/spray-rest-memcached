@@ -37,8 +37,14 @@
 			been accessed to fulfill the request.  If you don't see a note, you might
 		already have a cache entry in memcache, in which case you can restart
 		memcache to clear it. Now if you repeat the request, you should not see
-		another print out statement in which case the request was fulfilled from
+		another statement in the log mentioning that the request was fulfilled from
 		memcache.</p>
+
+	<p>To force the response of the server, you can include an http header to
+		invalidate the cache. To perform this using curl, you can use the following
+		command: <code>curl -ivH 'Cache-Control:max-age=0'
+			localhost:8080/profile</code>.  You should notice that the cache is not
+		used when fulfilling the request.</p>
 
 		</div>
 </body>
