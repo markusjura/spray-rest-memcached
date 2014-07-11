@@ -18,6 +18,14 @@
 						</code>
 					</pre>
 				</p>
+				<p>Although the default configuration points to localhost
+					and port 11211 for the Memcached server, you can change this default
+					configuration in the <a
+							href="#code/src/main/resources/application.conf"
+							class="shortcut">application.conf</a> file. The <code>hosts</code>entry
+					nested under <code>memcached</code> accepts a list of strings in the
+					format of "host:port". Change this variable to point to one or more
+					other memcached instances.</p> 
     </div>
 
     <!-- General Overview -->
