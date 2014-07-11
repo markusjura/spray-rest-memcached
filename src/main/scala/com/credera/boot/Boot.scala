@@ -2,7 +2,7 @@ package com.credera.boot
 
 import akka.actor.{Props, ActorSystem}
 import akka.io.IO
-import com.credera.h2.DataSource
+import com.credera.jdbc.DataSource
 import com.credera.rest.ProfileActor
 import spray.can.Http
 

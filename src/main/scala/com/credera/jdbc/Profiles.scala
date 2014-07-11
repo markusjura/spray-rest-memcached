@@ -1,4 +1,4 @@
-package com.credera.h2
+package com.credera.jdbc
 
 
 import scala.slick.driver.H2Driver.simple._

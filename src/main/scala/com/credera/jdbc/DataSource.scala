@@ -1,5 +1,6 @@
-package com.credera.h2
+package com.credera.jdbc
 
+import com.credera.config.AppConfig
 import com.mchange.v2.c3p0.ComboPooledDataSource
 
 import scala.slick.driver.H2Driver.simple._
@@ -10,20 +11,20 @@ object DataSource {
 
   val cpds = new ComboPooledDataSource
 
-  val h2:Database = {
+  val jdbc:Database = {
     val ds = new ComboPooledDataSource
-    ds.setDriverClass("org.h2.Driver")
-    ds.setJdbcUrl("jdbc:h2:mem:test")
+    ds.setDriverClass(AppConfig.JDBC.host)
+    ds.setJdbcUrl(AppConfig.JDBC.driver)
     Database.forDataSource(ds)
   }
 
   def apply() = {
-    h2 withSession {
+    jdbc withSession {
       implicit session =>
         Profiles.ddl.create
 
-        Profiles += (1, "Sam", "Bunting", "s@gmail.com")
-        Profiles += (2, "Andrew", "DeMaria", "j@gmail.com")
+        Profiles += (1, "Jon", "Doe", "jj@gmail.com")
+        Profiles += (2, "Jane", "Doe", "jd@gmail.com")
     }
   }
 

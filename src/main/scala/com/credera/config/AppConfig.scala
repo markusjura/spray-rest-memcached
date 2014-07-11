@@ -15,4 +15,11 @@ object AppConfig {
 
   }
 
+  object JDBC {
+    private val jdbcConfig = config.getConfig("jdbc")
+
+    lazy val host = jdbcConfig.getString("host")
+    lazy val driver = jdbcConfig.getString("driver")
+  }
+
 }
