@@ -48,8 +48,9 @@
 						implementation of a Spray cache: the <a
 								href="#code/src/main/scala/com/credera/cache/MemcachedCache.scala"
 								class="shortcut">MemcachedCache</a>. The basic idea is the same
-						as the LruCache implementation, except that we use Memcached instead
+						as the <code>LruCache</code> implementation, except that we use Memcached instead
 						of a ConcurrentHashMap for storing entries.</p>
+
 			<p>Now lets look at Memcache in action. First make get request for all
 				profiles. <code>curl localhost:8080/profile</code>.  You should get a
 				response and in your console you should see a note that the database has
