@@ -3,18 +3,21 @@ package com.credera.dao
 import com.credera.dto.Profile
 import com.credera.h2.DataSource._
 import scala.slick.driver.H2Driver.simple._
+import grizzled.slf4j.Logger
 
 trait ProfileDAOComponent {
 
   val profileDAO:ProfileDAO
 
   class ProfileDAO {
+    val logger = Logger(classOf[ProfileDAO])
 
     def fetchProfiles:Option[List[Profile]] = {
       var result = List.empty[Profile]
 
       h2 withSession {
         implicit session =>
+          logger.debug("Fetching profiles from database")
           Profiles foreach {
             case (id, firstName, lastName, email) =>
               result = Profile(Some(id), firstName, lastName, email) :: result
@@ -33,6 +36,7 @@ trait ProfileDAOComponent {
       profileExists(profile.email) match {
         case None =>
           session.withTransaction {
+            logger.debug("Inserting profile into database")
             Profiles.insert(0, profile.firstName, profile.lastName, profile.email)
           }
         case _ =>
@@ -44,6 +48,7 @@ trait ProfileDAOComponent {
       implicit val session = h2.createSession()
 
       session.withTransaction {
+        logger.debug("Updating profile in database")
         val q = for { p <- Profiles if p.email === profile.email } yield (p.firstName, p.lastName, p.email)
         q.update(profile.firstName, profile.lastName, profile.email)
       }
@@ -53,7 +58,7 @@ trait ProfileDAOComponent {
     private def profileExists(email:String):Option[Profile] = {
       h2 withSession {
         implicit session =>
-
+          logger.debug("Checking if profile exists in database")
           val q = Profiles.filter(_.email === email)
           val l = q.list()
 

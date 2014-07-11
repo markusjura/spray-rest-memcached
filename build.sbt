@@ -17,13 +17,15 @@ libraryDependencies ++= {
     "io.spray"            %%  "spray-json"    % "1.2.6",
     "com.typesafe.akka"   %%  "akka-actor"    % akkaV,
     "com.typesafe.akka"   %%  "akka-testkit"  % akkaV   % "test",
+    "org.slf4j"           %   "slf4j-log4j12" % "1.7.7",
+    "org.clapper"         %%  "grizzled-slf4j"% "1.0.2",
     "org.specs2"          %%  "specs2"        % "2.2.3" % "test",
     "com.typesafe.slick"  %%  "slick"         % "2.0.2",
     "org.slf4j"           %   "slf4j-nop"     % "1.6.4",
     "c3p0"                %   "c3p0"          % "0.9.0.4",
-    "com.thimbleware.jmemcached"     %   "jmemcached-core" % "1.0.0",
-    "net.spy"             %   "spymemcached"  % "2.11.4"
-//    "com.twitter"         % "finagle-memcached_2.10" % "6.18.0"
+    "net.spy"             %   "spymemcached"  % "2.11.4",
+    "org.apache.logging.log4j"       %  "log4j"           % "2.0-rc2",
+    "com.thimbleware.jmemcached"     %  "jmemcached-core" % "1.0.0"
   )
 }
 
