@@ -14,22 +14,10 @@ import scala.concurrent.duration.Duration
 
 object MemcachedCache {
 
-  def apply[V](memcachedHosts: List[String], timeToLiveSeconds: Int): Cache[V] = {
-    new MemcachedCache[V](memcachedHosts, timeToLiveSeconds)
-  }
+  def apply[V](memcachedHosts: List[String], timeToLiveSeconds: Int): Cache[V] = routeCache(memcachedHosts,timeToLiveSeconds)
 
-  /**
-   * Initializes a Cache for RouteResponses.  If memcachedEnabled = false, we'll fall back to
-   * the in-memory ExpiringLruCache provided by the Spray library
-   */
-  def routeCache(memcachedHosts: List[String], timeToLiveSeconds: Int, memcachedEnabled: Boolean): Cache[RouteResponse] = {
-
-    if(memcachedEnabled)
+  def routeCache(memcachedHosts: List[String], timeToLiveSeconds: Int): Cache[RouteResponse] = {
       MemcachedCache(memcachedHosts, timeToLiveSeconds)
-    else
-      new ExpiringLruCache[RouteResponse](maxCapacity = 500, initialCapacity = 16,
-        									timeToLive = Duration.Inf, timeToIdle = Duration.Inf)
-
   }
 
 }
@@ -90,8 +78,7 @@ final class MemcachedCache[V](memcachedHosts: List[String], timeToLiveSeconds: I
     }
   }
 
-  def clear(): Unit = { } //do nothing.  We could call memcached.flush to clear out
-  						  // memcached, but other applications are using the cache as well, so we won't
+  def clear(): Unit = { } // do nothing.
 
   def size = 0 // We don't care.  We just need to fulfill the contract of the Cache trait
 }
