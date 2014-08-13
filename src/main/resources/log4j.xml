@@ -14,8 +14,4 @@
 		<appender-ref ref="console" /> 
 	</root>
 	<logger name="com.example"> <level value="trace" /> </logger>
-</log4j:configuration>
-
-	<!-- vim:fenc=utf-8
--->
-
+</log4j:configuration> 

@@ -6,8 +6,8 @@ scalaVersion := "2.10.3"
 
 // Change this to another test framework if you prefer
 libraryDependencies ++= {
-  val akkaV = "2.3.2"
-  val sprayV = "1.3.1"
+  val akkaV = "2.2.4"
+  val sprayV = "1.2.0"
   Seq(
     "io.spray"            %   "spray-can"     % sprayV,
     "io.spray"            %   "spray-routing" % sprayV,
@@ -24,7 +24,8 @@ libraryDependencies ++= {
     "org.slf4j"           %   "slf4j-nop"     % "1.6.4",
     "c3p0"                %   "c3p0"          % "0.9.0.4",
     "net.spy"             %   "spymemcached"  % "2.11.4",
-    "org.apache.logging.log4j"       %  "log4j"           % "2.0-rc2"
+    "org.apache.logging.log4j"       %  "log4j"           % "2.0-rc2",
+    "com.thimbleware.jmemcached"  % "jmemcached-core"  %  "1.0.0"
   )
 }
 

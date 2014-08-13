@@ -2,18 +2,19 @@ package com.example.boot
 
 import akka.actor.{Props, ActorSystem}
 import akka.io.IO
+import com.example.cache.MemcachedDaemon
 import com.example.jdbc.DataSource
 import com.example.rest.ProfileActor
 import spray.can.Http
 
 object Boot extends App {
 
-  DataSource()
+  MemcachedDaemon //Start up the jmemcached MemCacheDaemon
+  DataSource() //Start and pre-populate the H2 database with a couple of Profiles
 
-  val ACTOR_SYSTEM = "on-spray-can"
-  implicit val system = ActorSystem(Boot.ACTOR_SYSTEM)
-
+  implicit val system = ActorSystem("spray-can")
   val service = system.actorOf(Props[ProfileActor], "profile-service")
 
   IO(Http) ! Http.Bind(service, interface = "localhost", port = 8080)
+
 }

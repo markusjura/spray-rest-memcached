@@ -8,16 +8,15 @@ object AppConfig {
   private val config = ConfigFactory.load()
 
   object Memcached {
-
-    private val memCachedConfig = config.getConfig("memcached")
-
-    lazy val hosts = memCachedConfig.getStringList("hosts").asScala.toList
+    private val memcachedConfig = config.getConfig("memcached")
+    lazy val hosts = memcachedConfig.getStringList("hosts").asScala.toList
+    lazy val enabled = memcachedConfig.getBoolean("enabled")
+    lazy val timeToLive = memcachedConfig.getInt("timeToLive") 
 
   }
 
   object JDBC {
     private val jdbcConfig = config.getConfig("jdbc")
-
     lazy val host = jdbcConfig.getString("host")
     lazy val driver = jdbcConfig.getString("driver")
   }

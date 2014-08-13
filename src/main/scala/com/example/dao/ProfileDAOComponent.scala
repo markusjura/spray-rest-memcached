@@ -1,6 +1,7 @@
 package com.example.dao
 
 import com.example.dto.Profile
+import com.example.exceptions.ProfileNotFoundException
 import com.example.jdbc.DataSource._
 import scala.slick.driver.H2Driver.simple._
 import grizzled.slf4j.Logger
@@ -12,66 +13,34 @@ trait ProfileDAOComponent {
   class ProfileDAO {
     val logger = Logger(classOf[ProfileDAO])
 
-    def fetchProfiles:Option[List[Profile]] = {
-      var result = List.empty[Profile]
-
-      jdbc withSession {
-        implicit session =>
-          logger.debug("Fetching profiles from database")
-          Profiles foreach {
-            case (id, firstName, lastName, email) =>
-              result = Profile(Some(id), firstName, lastName, email) :: result
-          }
-      }
-      Some(result)
-    }
-
-    def fetchProfileByEmail(email:String):Option[Profile] = {
-      profileExists(email)
-    }
-
-    def insertProfile(profile:Profile) = {
-      implicit val session = jdbc.createSession()
-
-      profileExists(profile.email) match {
-        case None =>
-          session.withTransaction {
-            logger.debug("Inserting profile into database")
-            Profiles.insert(0, profile.firstName, profile.lastName, profile.email)
-          }
-        case _ =>
-      }
-      session.close()
+    def getProfiles: List[Profile] = {
+      logger.debug("Getting all Profiles from the database")
+      Profiles.list
     }
     
-    def updateProfile(profile:Profile) = {
-      implicit val session = jdbc.createSession()
-
-      session.withTransaction {
-        logger.debug("Updating profile in database")
-        val q = for { p <- Profiles if p.email === profile.email } yield (p.firstName, p.lastName, p.email)
-        q.update(profile.firstName, profile.lastName, profile.email)
-      }
-      session.close()
+    def getProfile(id: Int): Option[Profile] = {
+      logger.debug(s"Getting Profile with id [$id] from the database")
+      Profiles.filter(_.id === id).firstOption
     }
-
-    private def profileExists(email:String):Option[Profile] = {
-      jdbc withSession {
-        implicit session =>
-          logger.debug("Checking if profile exists in database")
-          val q = Profiles.filter(_.email === email)
-          val l = q.list()
-
-          if(l.size == 0)
-            None
-          else {
-            val p = l(0)
-            Some(Profile(Some(p._1), p._2, p._3, p._4))
-        }
-      }
-
+    
+    def insertProfile(p: Profile) = {
+      logger.debug("Inserting Profile into the database")
+      Profiles += Profile(None, p.firstName, p.lastName, p.email)
     }
-
+    
+    def updateProfile(id: Int, p: Profile) = {  
+      val profilesToUpdate = Profiles.filter(_.id === id)
+      val qtyUpdated = profilesToUpdate map(r => (r.firstName, r.lastName, r.email)) update (p.firstName, p.lastName, p.email)
+      if(qtyUpdated == 0) throw new ProfileNotFoundException(id)
+      logger.debug(s"Updated Profile with id [$id] in the database")
+    }
+    
+    def deleteProfile(id: Int) = {
+      val qtyDeleted = Profiles.filter(_.id === id).delete
+      if(qtyDeleted == 0) throw new ProfileNotFoundException(id)
+     logger.debug(s"Deleted Profile with id [$id] from the database")
+    }
+    
   }
 
 

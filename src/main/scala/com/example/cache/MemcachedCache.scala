@@ -14,10 +14,22 @@ import scala.concurrent.duration.Duration
 
 object MemcachedCache {
 
-  def apply[V](memcachedHosts: List[String], timeToLiveSeconds: Int): Cache[V] = routeCache(memcachedHosts,timeToLiveSeconds)
+  def apply[V](memcachedHosts: List[String], timeToLiveSeconds: Int): Cache[V] = {
+      new MemcachedCache[V](memcachedHosts, timeToLiveSeconds)
+  }
 
-  def routeCache(memcachedHosts: List[String], timeToLiveSeconds: Int): Cache[RouteResponse] = {
-      MemcachedCache(memcachedHosts, timeToLiveSeconds)
+  /**
+   * Initializes a Cache for RouteResponses.  If memcachedEnabled = false, we'll fall back to
+   * the in-memory ExpiringLruCache provided by the Spray library
+   */  
+  def routeCache(memcachedHosts: List[String], timeToLiveSeconds: Int, memcachedEnabled: Boolean): Cache[RouteResponse] = {
+    
+    if(memcachedEnabled)
+      MemcachedCache(memcachedHosts, timeToLiveSeconds) 
+    else 
+      new ExpiringLruCache[RouteResponse](maxCapacity = 500, initialCapacity = 16,
+        								  timeToLive = Duration.Inf, timeToIdle = Duration.Inf) 
+        									
   }
 
 }
@@ -45,15 +57,14 @@ final class MemcachedCache[V](memcachedHosts: List[String], timeToLiveSeconds: I
   }
 
   def apply(key: Any, genValue: () => Future[V])(implicit ec: ExecutionContext): Future[V] = {
-
     val optObj = Option(memcachedClient.get(key.toString))
     optObj match {
       case None =>
         log.debug("cache miss - key: {} ", key.toString)
         val future = genValue()
         future.onComplete { value =>
-          log.debug("add cache entry - key: {} " + key.toString)
-          log.trace("add cache entry - value: {}" + value.get)
+          log.debug("add cache entry - key: {} ", key.toString)
+          log.trace("add cache entry - value: {}", value.get)
           memcachedClient.add(key.toString, timeToLiveSeconds, value.get)
         }
         future
@@ -67,7 +78,7 @@ final class MemcachedCache[V](memcachedHosts: List[String], timeToLiveSeconds: I
   }
 
   def remove(key: Any) = {
-    log.debug("remove cache entry - key: {}" , key.toString)
+    log.debug("remove cache entry - key: {}", key.toString)
     val obj = memcachedClient.get(key.toString)
     obj match {
       case null => None
