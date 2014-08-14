@@ -24,7 +24,8 @@ libraryDependencies ++= {
     "c3p0"                %   "c3p0"          % "0.9.0.4",
     "net.spy"             %   "spymemcached"  % "2.11.4",
     "org.apache.logging.log4j"       %  "log4j"           % "2.0-rc2",
-    "com.thimbleware.jmemcached"  % "jmemcached-core"  %  "1.0.0"
+    "com.thimbleware.jmemcached"  % "jmemcached-core"  %  "1.0.0",
+    "com.hazelcast"       %   "hazelcast"     % "3.1.7"
   )
 }
 
