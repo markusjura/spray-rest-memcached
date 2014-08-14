@@ -21,7 +21,6 @@ libraryDependencies ++= {
     "org.clapper"         %%  "grizzled-slf4j"% "1.0.2",
     "org.specs2"          %%  "specs2"        % "2.2.3" % "test",
     "com.typesafe.slick"  %%  "slick"         % "2.0.2",
-    "org.slf4j"           %   "slf4j-nop"     % "1.6.4",
     "c3p0"                %   "c3p0"          % "0.9.0.4",
     "net.spy"             %   "spymemcached"  % "2.11.4",
     "org.apache.logging.log4j"       %  "log4j"           % "2.0-rc2",

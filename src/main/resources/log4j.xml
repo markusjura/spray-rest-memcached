@@ -9,9 +9,12 @@
 		</layout> 
 	</appender> 
 
+  <logger name="com.example"> <level value="trace" /> </logger>
+  
 	<root> 
 		<priority value ="error" /> 
 		<appender-ref ref="console" /> 
 	</root>
-	<logger name="com.example"> <level value="trace" /> </logger>
-</log4j:configuration> 
+
+</log4j:configuration>
+

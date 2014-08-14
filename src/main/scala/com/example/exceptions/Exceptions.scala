@@ -1,3 +1,3 @@
 package com.example.exceptions
 
-class ProfileNotFoundException(profileId: Int) extends RuntimeException(s"The requested Profile with id [$profileId] cannot be found")
+case class ProfileNotFoundException(profileId: Int) extends RuntimeException(s"The requested Profile with id [$profileId] cannot be found")
