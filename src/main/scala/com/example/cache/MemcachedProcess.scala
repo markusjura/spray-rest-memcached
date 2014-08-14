@@ -7,7 +7,9 @@ import com.thimbleware.jmemcached.storage.hash.ConcurrentLinkedHashMap
 
 import java.net.InetSocketAddress
 
-object MemcachedDaemon {
+object MemcachedProcess {
+  
+  //We're only starting a single MemCacheDaemon
   
   private val memcachedDaemon = {
     

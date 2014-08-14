@@ -1,4 +1,4 @@
-name := """spray-can-cache"""
+name := """spray-rest-memcached"""
 
 version := "1.0"
 
