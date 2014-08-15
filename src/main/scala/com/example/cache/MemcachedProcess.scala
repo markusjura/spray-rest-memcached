@@ -7,9 +7,18 @@ import com.thimbleware.jmemcached.storage.hash.ConcurrentLinkedHashMap
 
 import java.net.InetSocketAddress
 
+/**
+ * Configures and wraps a single `MemCacheDaemon`
+ * 
+ * The host and port information are configured in `application.conf` under `memcached.hosts`
+ * 
+ * Although the value of `memcached.hosts` is a List, `MemcachedProcess` will simply retrieve
+ * the first value from that List
+ * 
+ * `MemCacheDaemon` is provided by the [[http://code.google.com/p/jmemcache-daemon/ jmemcached]] library 
+ * -- a Java implementation of the daemon (server) side of the Memcached protocol.
+ */
 object MemcachedProcess {
-  
-  //We're only starting a single MemCacheDaemon
   
   private val memcachedDaemon = {
     

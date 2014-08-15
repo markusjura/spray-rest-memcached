@@ -8,7 +8,9 @@ import spray.routing.Directive._
 import spray.routing.{ExceptionHandler, HttpService}
 import spray.util.LoggingContext
 
-
+/**
+ * Defines a custom ExceptionHandler for our application 
+ */
 trait RouteExceptionHandlers extends HttpService {
   
   implicit def exceptionHandler(implicit log: LoggingContext) = ExceptionHandler {

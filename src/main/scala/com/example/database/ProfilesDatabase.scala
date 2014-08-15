@@ -6,6 +6,9 @@ import com.mchange.v2.c3p0.ComboPooledDataSource
 
 import scala.slick.driver.H2Driver.simple._
 
+/**
+ * Creates the H2 database and pre-loads the PROFILES table with a couple of `Profile`s
+ */
 object ProfilesDatabase {
 
   val Profiles = TableQuery[Profiles]
@@ -27,6 +30,9 @@ object ProfilesDatabase {
 
 }
 
+/**
+ * Defines the PROFILES table
+ */
 class Profiles(tag: Tag) extends Table[Profile](tag, "PROFILES") {
   def id = column[Option[Int]]("User_ID", O.PrimaryKey, O.AutoInc)
   def firstName = column[String]("First_Name__ID")

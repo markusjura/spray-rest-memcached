@@ -25,15 +25,23 @@ class ProfileActor extends Actor with ProfileService {
   def receive = runRoute(profileRoute)
 }
 
+/**
+ * Provides the RESTful API for managing `Profile`s 
+ */
 trait ProfileService extends HttpService with SprayJsonSupport with RouteExceptionHandlers  {
 
   private val profileDAO = ProfileDAO
-  private val theCache = MemcachedCache.routeCache(Memcached.hosts, Memcached.timeToLive , Memcached.enabled)
-
+  
+  //The Cache used for storing our RouteResponse
+  private val theCache = MemcachedCache.routeCache(Memcached.hosts, Memcached.timeToLive)
+  
+  //We define a custom keyer that returns just the path and parameters of the request
+  //For example, http://localhost:8080/profiles/1 will return /profiles/1
   implicit val relativeUriKeyer = CacheKeyer { 
   	case RequestContext(HttpRequest(GET, uri, _, _, _), _, _) => uri.toRelative
   }  
     
+  //Helper method for evicting cache entries used for PUT, POST, and DELETE requests
   private def evictCache(uri: Uri, evictParentPath: Boolean) = {
     theCache.remove(uri.toRelative)
     if(evictParentPath) {

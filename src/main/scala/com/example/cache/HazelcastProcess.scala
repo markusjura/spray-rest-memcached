@@ -10,9 +10,18 @@ import java.util.Map
 import java.util.Queue
 
 
+/**
+ * Configures and wraps a single `HazelcastInstance`
+ * 
+ * The host and port information are configured in `application.conf` under `memcached.hosts`
+ * 
+ * Although the value of `memcached.hosts` is a List, `HazelcastInstance` will simply retrieve
+ * the first value from that List
+ * 
+ * `HazelcastInstance` is provided by the [[http://hazelcast.com/ hazelcast]] library 
+ * -- an open source in-memory data grid .
+ */
 object HazelcastProcess {
-  
-  //We're only starting a single HazelcastInstance
   
   private val instance: HazelcastInstance = {
     

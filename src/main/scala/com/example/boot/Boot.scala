@@ -7,11 +7,25 @@ import com.example.database.ProfilesDatabase
 import com.example.rest.ProfileActor
 import spray.can.Http
 
+/**
+ * Creates the `MemcachedProcess` (or optionally `HazelcastProcess`), `ProfilesDatabase`,
+ * and the `ActorSystem` used by the spray-can HTTP server.
+ *  
+ * To use Hazelcast instead of jmemcached (an JVM-based implementation of Memcached), 
+ * simply uncomment `HazelcastProcess` and comment out `MemcachedProcess` like so:
+ * 
+ * {{{
+ *  HazelcastProcess
+ *  //MemcachedProcess
+ * }}}
+ * 
+ * @see [[com.example.cache.MemcachedProcess]], [[com.example.cache.HazelcastProcess]], [[com.example.database.ProfilesDatabase]]
+ */
 object Boot extends App {
 
-  //HazelcastProcess <- To use Hazelcast instead of jmemcached, uncomment this line and comment out MemcachedProcess 
-  MemcachedProcess //Start up the jmemcached MemCacheDaemon
-  ProfilesDatabase //Start and pre-populate the H2 database with a couple of Profiles
+  //HazelcastProcess 
+  MemcachedProcess
+  ProfilesDatabase
 
   implicit val system = ActorSystem("spray-can")
   val service = system.actorOf(Props[ProfileActor], "profile-service")

@@ -12,35 +12,45 @@ import spray.routing.directives.CachingDirectives.RouteResponse
 import spray.caching.ExpiringLruCache
 import scala.concurrent.duration.Duration
 
+/** 
+ *  Factory for `MemcachedCache` instances.
+ */
 object MemcachedCache {
-
-  def apply[V](memcachedHosts: List[String], timeToLiveSeconds: Int): Cache[V] = {
+  
+  /**
+   * Creates a `MemcachedCache`
+   * 
+   * @param memcachedHosts The Memcached hosts.  Each entry should be in the format of `ip:port`
+   * @param timeToLiveSeconds The configured time to live in seconds for each cache entry
+   */
+  def apply[V](memcachedHosts: List[String], timeToLiveSeconds: Int): MemcachedCache[V] = {
       new MemcachedCache[V](memcachedHosts, timeToLiveSeconds)
   }
 
   /**
-   * Initializes a Cache for RouteResponses.  If memcachedEnabled = false, we'll fall back to
-   * the in-memory ExpiringLruCache provided by the Spray library
-   */  
-  def routeCache(memcachedHosts: List[String], timeToLiveSeconds: Int, memcachedEnabled: Boolean): Cache[RouteResponse] = {
-    
-    if(memcachedEnabled)
-      MemcachedCache(memcachedHosts, timeToLiveSeconds) 
-    else 
-      new ExpiringLruCache[RouteResponse](maxCapacity = 500, initialCapacity = 16,
-        								  timeToLive = Duration.Inf, timeToIdle = Duration.Inf) 
-        									
+   * Creates a `MemcachedCache` to store `RouteResponse`s
+   * 
+   * @param memcachedHosts The Memcached hosts.  Each entry should be in the format of `ip:port`
+   * @param timeToLiveSeconds The configured time to live in seconds for each cache entry
+   */
+  def routeCache(memcachedHosts: List[String], timeToLiveSeconds: Int): MemcachedCache[RouteResponse] = {
+      MemcachedCache[RouteResponse](memcachedHosts, timeToLiveSeconds)
   }
 
 }
 
-
+/**
+ *  An implementation of `spray.caching.Cache`
+ *  
+ *  Uses the [[https://code.google.com/p/spymemcached/ spymemcached]] library to store
+ *  items in Memcached, or other caches such as Hazelcast that work with Memcached clients
+ */
 final class MemcachedCache[V](memcachedHosts: List[String], timeToLiveSeconds: Int) extends Cache[V] {
 
-  val log = LoggerFactory.getLogger(classOf[MemcachedCache[V]])
+  private val log = LoggerFactory.getLogger(classOf[MemcachedCache[V]])
 
   import scala.collection.JavaConversions._
-  val memcachedClient = new MemcachedClient(AddrUtil.getAddresses(memcachedHosts))
+  private val memcachedClient = new MemcachedClient(AddrUtil.getAddresses(memcachedHosts))
 
   def get(key: Any) = {
     memcachedClient.get(key.toString) match {
@@ -89,7 +99,7 @@ final class MemcachedCache[V](memcachedHosts: List[String], timeToLiveSeconds: I
     }
   }
 
-  def clear(): Unit = { } // do nothing.
+  def clear(): Unit = memcachedClient.flush() // Be careful!  Are you sure you want to evict EVERYTHING?
 
   def size = 0 // We don't care.  We just need to fulfill the contract of the Cache trait
 }
