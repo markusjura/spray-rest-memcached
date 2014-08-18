@@ -5,77 +5,299 @@
     <title></title>
 </head>
 <body>
-    <!-- Prerequisites and setup tab -->
     <div>
-        <h2>Prerequisites and Setup</h2>
-        <p>This template demonstrates interaction from a spray web application with Memcached and therefore requires it to be installed.</p>
-        <p>Go to <a href="http://memcached.org/">memcached.org</a> to install
-					the correct version for your operating system. To ensure that it is
-					up and running, you can try telneting to it.
-					<pre>
-						<code>
-						telnet localhost 11211
-						</code>
-					</pre>
-				</p>
-				<p>Although the default configuration points to localhost
-					and port 11211 for the Memcached server, you can change this default
-					configuration in the <a
-							href="#code/src/main/resources/application.conf"
-							class="shortcut">application.conf</a> file. The <code>hosts</code>entry
-					nested under <code>memcached</code> accepts a list of strings in the
-					format of <code>"host:port"</code>. Change this variable to point to one or more
-					other memcached instances.</p> 
-    </div>
-
-    <!-- General Overview -->
+        <h2>Purpose</h2>
+        <p>In this template, we’ll build a small Spray application that provides a RESTful API for the management
+            of Profiles in order to demonstrate how the Spray routing and caching libraries can be 
+            used to manage an external cache.</p>
+        <p>More specifically, we'll use the spymemcached client
+            library to build an implementation of the Spray Cache trait that can manage Spray
+            RouteResponses within an external Memcached or Hazelcast process.</p>
+    </div> 
+    
     <div>
-        <h2>General Overview</h2>
-        <p>This template uses spray-can to create a basic RESTful interface. If you run the application you can go to <a href="http://localhost:8080/profile">localhost:8080/profile</a> to see a simple JSON response for the service</p>
-        <p>The <a href="#code/src/main/scala/rest/ProfileServiceComponent.scala" class="shortcut">ProfileServiceComponent</a> class is where we define the Profile route and add a few endpoints</p>
-        <p></p>
-    </div>
-
-		<div>
-			<h2>Using Memcached</h2>
-			<p>To see how Memcached is being used with the app, take a look at the <a
-						href="#code/src/main/scala/rest/ProfileServiceComponent.scala"
-						class="shortcut">routes</a> again. Caching is done via the <a
-								href="http://spray.io/documentation/1.0.1/spray-routing/caching-directives/cache/"
-								>cache directive</a>. The cache directive accepts an
-						implementation of a Spray cache which usually references the default
-						<code>LruCache</code>. However, this template provides a custom
-						implementation of a Spray cache: the <a
-								href="#code/src/main/scala/com/credera/cache/MemcachedCache.scala"
-								class="shortcut">MemcachedCache</a>. The basic idea is the same
-						as the <code>LruCache</code> implementation, except that we use Memcached instead
-						of a ConcurrentHashMap for storing entries.</p>
-
-			<p>Now lets look at Memcache in action. First make get request for all
-				profiles. <code>curl localhost:8080/profile</code>.  You should get a
-				response and in your console you should see a note that the database has
-			been accessed to fulfill the request.  If you don't see a note, you might
-		already have a cache entry in memcache, in which case you can restart
-		memcache to clear it. Now if you repeat the request, you should not see
-		another statement in the log mentioning that the request was fulfilled from
-		memcache.</p>
-
-	<p>To force the response of the server, you can include an http header to
-		invalidate the cache. To perform this using curl, you can use the following
-		command: <code>curl -ivH 'Cache-Control:max-age=0'
-			localhost:8080/profile</code>.  You should notice that the cache is not
-		used when fulfilling the request.</p>
-
-		</div>
+        <h2>Background</h2>
+        <p>A common need for many applications is the ability to not only read and modify a cache 
+            store, but for that cache to be externalized from the process that is accessing the data 
+            so that the data contained within the cache can be accessed from multiple applications 
+            or processes that operate independently of each other.</p>
+        <p>For example, imagine an application that provides a RESTful endpoint to return a user’s 
+            profile information.  Furthermore, imagine that the implementation of that RESTful 
+            endpoint amalgamates data from several other external systems to build the representation 
+            of the profile, and that the invocation of that endpoint takes a long time to complete.  
+            We might reduce the time it takes to return the profile on subsequent invocations by 
+            storing the initial result in a cache that can be accessed for the second, third, etc. 
+            call to return the same profile.</p>
+        <p>Taking the example one step further, imagine that there are two instances of that 
+            application, A and B, running behind a load balancer that distributes requests in a 
+            round-robin fashion.  If application A receives the first request for a given profile, 
+            we want the resulting profile to be stored in an external cache so that if a subsequent 
+            request for the same profile is forwarded to application B, it can retrieve the profile 
+            from cache without having to also make the time consuming calls to the external systems 
+            that were already made by A.</p>
+        <p>The Spray caching library provides two in-memory cache implementations using an underlying 
+            ConcurrentLinkedHashMap.  But if we want to externalize the cache such that it can be 
+            shared across applications as in the example above, those implementations will 
+            not suffice.  We'll instead implement a Spray Cache using the spymemcached library in 
+            order to integrate with Memcached, which will run in a process separate from our application.</p>
+    </div> 
+    
     <div>
-        <h2>Slick Integration</h2>
-
-        <p>In the <a href="#code/src/main/scala/dao/ProfileDAOComponent.scala" class="shortcut">ProfileDAOComponent</a> is
-            the persistence logic. This template loads an H2 database into memory and employs Slick to read and write
-            profile information to it.</p>
-
-        <p>By defining a <a href="#code/src/main/scala/h2/Profiles.scala" class="shortcut">Profiles</a> table you can link
-            to the data stored in H2 and run queries against it</p>
+        <h2>Profile HTTP API</h2>
+        <p><h3>Service Provider</h3></p>
+        <p>The API for managing <a href="#code/src/main/scala/com/example/dto/Profile.scala" class="shortcut">Profiles</a> 
+           is provided by the Route (named profileRoute) defined on the 
+        <a href="#code/src/main/scala/com/example/rest/ProfileService.scala" class="shortcut">ProfileService</a> trait.</p>
+        
+        <p><h3>API Summary</h3></p>
+        <p>GET /profiles to get all Profiles<br/>
+           POST /profiles to create a new Profile<br/>
+           GET /profiles/${profileId} to get a specific Profile</br>
+           PUT /profiles/${profileId} to update a specific Profile<br/>
+           DELETE /profiles/{$profileId} to delete a specific Profile</p>
+           <p><i>Note: ${profileId} is an IntNumber, and the ID of the profile, i.e id == profile.id</i></p>
+        
+        <p><h3>API Details</h3></p>
+        <p><b>Description:</b> Get all Profiles<br/>
+           <b>Method:</b> GET <br/>
+           <b>Path:</b> /profiles</p>
+           <b>Sample Call:</b><br/>
+           <pre><code>bash-3.2$ curl http://localhost:8080/profiles
+[{
+   "id": 1,
+   "firstName": "Jon",
+   "lastName": "Doe",
+   "email": "jj@gmail.com"
+ }, {
+   "id": 2,
+   "firstName": "Jane",
+   "lastName": "Doe",
+   "email": "jd@gmail.com"
+}]
+           </code></pre>
+           
+        <p><b>Description:</b> Create a Profile<br/>
+           <b>Method:</b> POST <br/>
+           <b>Path:</b> /profiles</p>
+           <b>Sample Call:</b><br/>
+           <pre><code>bash-3.2$ curl -X POST \
+> -H "Content-Type: application/json" \
+> -d '{"firstName": "Frank", "lastName": "Zappa", "email": "fzappa@rip.com"}' \
+> http://localhost:8080/profiles
+{
+  "id": 3,
+  "firstName": "Frank",
+  "lastName": "Zappa",
+  "email": "fzappa@rip.com"
+}
+           </code></pre>
+           
+        <p><b>Description:</b> Get a specific Profile<br/>
+           <b>Method:</b> GET <br/>
+           <b>Path:</b> /profiles/${profileId}</p>
+           <b>Sample Call:</b><br/>
+           <pre><code>bash-3.2$ curl http://localhost:8080/profiles/3
+{
+  "id": 3,
+  "firstName": "Frank",
+  "lastName": "Zappa",
+  "email": "fzappa@rip.com"
+}
+           </code></pre>
+           
+        <p><b>Description:</b> Update a specific Profile<br/>
+           <b>Method:</b> PUT <br/>
+           <b>Path:</b> /profiles/${profileId}</p>
+           <b>Sample Call:</b><br/>
+           <pre><code>bash-3.2$ curl -X PUT \
+> -H "Content-Type: application/json" \
+> -d '{"firstName": "Sheik", "lastName": "Yerbouti", "email": "frankzappa@mothersofinvention.com"}' \
+> http://localhost:8080/profiles/3
+{
+  "firstName": "Sheik",
+  "lastName": "Yerbouti",
+  "email": "frankzappa@mothersofinvention.com"
+}
+           </code></pre>    
+           
+        <p><b>Description:</b> Delete a specific Profile<br/>
+           <b>Method:</b> DELETE <br/>
+           <b>Path:</b> /profiles/${profileId}</p>
+           <b>Sample Call:</b><br/>
+           <pre><code>bash-3.2$ curl -X DELETE http://localhost:8080/profiles/3</code></pre>                                
+                      
     </div>
+    
+    <div>
+        <h2>The Cache</h2>
+        
+        <h3>A Minor Caveat</h3>
+        <p>The purpose of this template is to show an example implementation of a
+           Spray Cache that can be used for integrating a Spray application with a cache store 
+           that runs in a separate process (i.e. outside of the JVM running the Spray application).
+           However, it's also desirable to make this tutorial as self contained as possible.</p>
+        <p>In light of both goals, the authors have decided to use the 
+        <a href="https://code.google.com/p/jmemcache-daemon/" target="_blank">jmemcached</a> library instead
+        of running <a href="http://www.memcached.org/" target="_blank">Memcached.</a>  This allows us
+        to run both the Spray application and manage a cache that conforms to the Memcached protocol
+        within the same JVM process.</p>
+        
+        <p>If you desire to do so, you can nevertheless use an external
+        Memcached process with this tutorial without changing any code other than commenting out
+        the following two lines from
+        <a href="#code/src/main/scala/com/example/boot/Boot.scala" class="shortcut">Boot.scala</a>.</p>
+        
+        <pre><code>
+HazelcastProcess 
+MemcachedProcess
+        </code></pre>
+        <p><i>For details concerning how to install Memcached, please refer to the Memcached website.</i></p>
+        
+        
+        <h3>Starting the Cache</h3>  
+        <p>The cache is initialized by Boot.scala on startup of the application.
+        
+        <pre><code>
+object Boot extends App {
+
+  //HazelcastProcess 
+  MemcachedProcess
+  ProfilesDatabase
+
+  implicit val system = ActorSystem("spray-can")
+  val service = system.actorOf(Props[ProfileActor], "profile-service")
+
+  IO(Http) ! Http.Bind(service, interface = "localhost", port = 8080)
+
+}        
+        
+        </code></pre>    
+        
+        <p><b>MemcachedProcess</b></p>
+        <p><a href="#code/src/main/scala/com/example/cache/MemcachedProcess.scala"class="shortcut">MemcachedProcess</a>
+           starts and configures a MemCacheDaemon (a jmemcached class).  This is the
+           cache that our application will be using to store RouteResponses.  The cache is configured
+           based on the <i>memcached</i> property values provided in the 
+           <a href="#code/src/main/resources/application.conf"class="shortcut">application.conf</a> file.
+           Please note that while <i>memcached.hosts</i> is a List of strings in the format of <i>ip</i>:<i>port</i>,
+           only the first value from the List will be used.</p>
+        
+        <p><b>HazelcastProcess</b></p>
+        <p>Did you notice the commented out <a href="#code/src/main/scala/com/example/cache/HazelcastProcess.scala"class="shortcut">HazelcastProcess</a>?
+           It just so happens that <a href="http://www.hazelcast.com" target="_blank">Hazelcast</a> is compatible with Memcached clients.  And since we've
+           used the spymemcached library to implement <a href="#code/src/main/scala/com/example/cache/MemcachedCache.scala"class="shortcut">MemcachedCache</a> (our Spray Cache), we can use
+           MemcachedCache with Hazelcast as well.</p>
+        <p>If you'd like to use Hazelcast instead of jmemcached, simply comment out MemcachedProcess
+           and uncomment HazelcastProcess in Boot.scala like so:</p>
+           <pre><code>
+  HazelcastProcess 
+  //MemcachedProcess          
+           </code></pre>          
+         <p>HazelcastProcess is configured with the same application.conf properties as MemcachedProcess.</p> 
+    </div>
+    
+    <div>
+        <h2>Spray Cache Implementation</h2>
+        <p><a href="#code/src/main/scala/com/example/cache/MemcachedCache.scala"class="shortcut">MemcachedCache</a>
+           is an implementation of 
+           <a href="https://github.com/spray/spray/blob/master/spray-caching/src/main/scala/spray/caching/Cache.scala" target="_blank">spray.caching.Cache</a> 
+           that uses the spymemcached library.  Within this application, MemcachedCache is used for caching 
+           <a href="https://github.com/spray/spray/blob/master/spray-routing/src/main/scala/spray/routing/directives/CachingDirectives.scala" target="_blank">RouteResponses</a> of 
+           <a href="#code/src/main/scala/com/example/rest/ProfileService.scala" class="shortcut">ProfileService</a>.
+           However, it can just as well be used to cache any other type of serializable object.</p>
+           
+        <h3>Some Notes on the Implementation</h3>
+        <ul>
+          <li>Although MemcachedCache is generic, the companion object provides a factory method (routeCache)
+              that returns an instance parameterized with RouteResponse.</li>
+          <li><code>apply(key: Any, genValue: () => Future[V])</code> checks for an entry within the cache based on the provided key, and if not found,
+          inserts a value into the cache based on genValue.</li>
+          <li><code>def remove(key: Any)</code> is called by ProfileService for all POSTs, PUTs, and DELETEs of Profile resources.</li>
+        </ul>
+    </div>   
+    
+    <div>
+        <h2>ProfileService</h2>
+        <p><a href="#code/src/main/scala/com/example/rest/ProfileService.scala" class="shortcut">ProfileService</a>
+         implements <a href="https://github.com/spray/spray/blob/master/spray-routing/src/main/scala/spray/routing/HttpService.scala" target="_blank">spray.routing.HttpService</a>, 
+         and provides the RESTful API for managing Profiles.</p>
+        <p>Let's step through the code:</p>
+        
+        <p>1.  We first get a reference to <a href="#code/src/main/scala/com/example/dao/ProfileDAO.scala" class="shortcut">ProfileDAO</a>, 
+          which is going to provide the API for querying, inserting, updating, and deleting Profiles 
+          from a data store -- in our case an H2 database.</p>         
+          <pre><code>
+private val profileDAO = ProfileDAO          
+          </code></pre>        
+
+        <p>2.  Next, we create an instance of <i>MemcachedCache[spray.routing.directives.CachingDirectives.RouteResponse]</i>, which
+           will be used for storing and removing our RouteResponses.</p>             
+          <pre><code>
+private val theCache = MemcachedCache.routeCache(Memcached.hosts, Memcached.timeToLive)          
+          </code></pre>        
+    
+       <p>3.  We then define a custom keyer that returns just the path and parameters of the request.
+          This will be useful to us in the case that we have multiple instances of the same 
+          application accessible through different IP addreses or ports.</p>
+       <p>For example, let's say we have the same application running on two different ports
+          under the same IP address - http://127.0.0.1:8080 and  http://127.0.0.1:9090.
+          We wouldn't want to save individual entries for each application in the external cache
+          with keys of <i>http://127.0.0.1:8080/profiles</i> and <i>http://127.0.0.1:9090/profiles</i>.</p>
+          
+       <p>It'd be preferable to simply have a single cache entry with a key of <i>/profiles</i> that's
+          accessible by both instances of the application.  That allows each application to benefit from the 
+          work that's already been done by the other.               
+          <pre><code>
+implicit val relativeUriKeyer = CacheKeyer { 
+  case RequestContext(HttpRequest(GET, uri, _, _, _), _, _) => uri.toRelative
+}            
+          </code></pre> 
+          
+          
+       <p>4.  We wrap most of our route definition in the <i>alwaysCache</i> directive, passing it 
+              our MemcachedCache for persisting responses to jmemcached (or Hazelcast).</p>             
+          <pre><code>
+val profileRoute = {
+  alwaysCache(theCache) {
+  ...rest of route definition...
+  }
+}            
+          </code></pre>              
+
+
+       <p>5.  In cases where we modify the Profile resource, we want to make sure that we evict
+              any associated cache entries, so that subsequent requests to GET that
+              resource will return the most up to date version.</p>
+       <p> Because of this, you'll notice that all POST, PUT, and DELETE requests make a call
+       to <code>evictCache(uri: Uri, evictParentPath: Boolean)</code>.</p>
+       <p>The definition of evictCache is shown below.</p>
+       <p>What evictCache does is pretty straight-forward.  It will evict the cache based on the URI
+          provided, and optionally its parent path.  For instance, if the URI is <i>/profiles/1</i>, the
+          parent path is considered to be <i>/profiles</i>.</p>
+       <p>As an example of where we might want to evict the cache entry of the parent path consider the 
+          following scenario:
+          <ol>
+              <li>A call to GET /profiles is made, querying and caching all profiles from the database.</li>
+              <li>A call to GET /profiles/1 is made, creating a cache entry for Profile with id == 1. </li>
+              <li>A call to DELETE /profiles/1 is made, deleting the Profile with id == 1. </li>
+          </ol>
+          </p> 
+          <p>Steps 1 and 2 both create individual cache entries, each containing the data for the Profile with id == 1.
+             When we delete the very same Profile, we want to make sure that its details are removed from both cache entries.
+             Therefore, we need to remove the cache for both GET /profiles and GET /profiles/1.  By passing in <i>true</i>, for
+             the evictParentPath argument, we'll ensure that this happens.</p>
+            
+          <pre><code>
+private def evictCache(uri: Uri, evictParentPath: Boolean) = {
+  theCache.remove(uri.toRelative)
+  if(evictParentPath) {
+    val uriString = uri.toRelative.toString
+    theCache.remove(uriString.substring(0, uriString.lastIndexOf("/")))        
+  }
+}           
+          </code></pre>              
+             
+    </div>                        
+
 </body>
 </html>

@@ -39,8 +39,9 @@ object ProfileDAO {
    * @param p The `Profile` to store
    */
   def insertProfile(p: Profile) = {
-    logger.debug("Inserting Profile into the database")
-    Profiles += Profile(None, p.firstName, p.lastName, p.email)
+    val profileId = (Profiles returning Profiles.map(_.id)) += Profile(None, p.firstName, p.lastName, p.email)
+    logger.debug(s"Inserted Profile with id [${profileId.getOrElse(None)}] into the database")
+    p.copy(id = profileId)
   }
     
   /**

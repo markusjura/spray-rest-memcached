@@ -62,9 +62,9 @@ trait ProfileService extends HttpService with SprayJsonSupport with RouteExcepti
       } ~
       (post & path("profiles")) { // Create a single Profile
         entity(as[Profile]) { profile => ctx =>
-          profileDAO.insertProfile(profile)
+          val insertedProfile = profileDAO.insertProfile(profile)
           evictCache(ctx.request.uri, false)              
-          ctx.complete(StatusCodes.Created, profile)
+          ctx.complete(StatusCodes.Created, insertedProfile)
         }
       } ~
       (get & path("profiles" / IntNumber)) { id => //Get a single Profile

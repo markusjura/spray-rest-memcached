@@ -100,7 +100,9 @@ final class MemcachedCache[V](memcachedHosts: List[String], timeToLiveSeconds: I
   }
 
   def clear(): Unit = memcachedClient.flush() // Be careful!  Are you sure you want to evict EVERYTHING?
+		  									  // Perhaps the cache is being used by other clients that wouldn't appreciate that.
 
-  def size = 0 // We don't care.  We just need to fulfill the contract of the Cache trait
+  def size = 0 // Spymemcached doesn't provide an API to provide this information.
+  			   // Returning 0 just to fulfill the contract of the Cache trait
 }
 
