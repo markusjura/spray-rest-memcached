@@ -13,6 +13,10 @@
         <p>More specifically, we'll use the spymemcached client
             library to build an implementation of the Spray Cache trait that can manage Spray
             RouteResponses within an external Memcached or Hazelcast process.</p>
+        <p>During startup of the application an H2 database will be populated with 2 Profiles.
+           Initial requests for those resources will be forwarded to the database and responses cached.
+           Subsequent requests will be served by the cache unless otherwise evicted due to 
+           updates or deletions of said resources.
     </div> 
     
     <div>
