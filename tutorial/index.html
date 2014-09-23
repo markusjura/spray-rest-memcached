@@ -85,9 +85,9 @@
            <b>Path:</b> /profiles</p>
            <b>Sample Call:</b><br/>
            <pre><code>bash-3.2$ curl -X POST \
-> -H "Content-Type: application/json" \
-> -d '{"firstName": "Frank", "lastName": "Zappa", "email": "fzappa@rip.com"}' \
-> http://localhost:8080/profiles
+-H "Content-Type: application/json" \
+-d '{"firstName": "Frank", "lastName": "Zappa", "email": "fzappa@rip.com"}' \
+http://localhost:8080/profiles
 {
   "id": 3,
   "firstName": "Frank",
@@ -114,9 +114,9 @@
            <b>Path:</b> /profiles/${profileId}</p>
            <b>Sample Call:</b><br/>
            <pre><code>bash-3.2$ curl -X PUT \
-> -H "Content-Type: application/json" \
-> -d '{"firstName": "Sheik", "lastName": "Yerbouti", "email": "frankzappa@mothersofinvention.com"}' \
-> http://localhost:8080/profiles/3
+-H "Content-Type: application/json" \
+-d '{"firstName": "Sheik", "lastName": "Yerbouti", "email": "frankzappa@mothersofinvention.com"}' \
+http://localhost:8080/profiles/3
 {
   "firstName": "Sheik",
   "lastName": "Yerbouti",
